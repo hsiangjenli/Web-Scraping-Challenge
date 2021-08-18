@@ -1,39 +1,28 @@
-import os 
-import datetime
-
-class ANUE_URL:
-    v1 = 'https://api.cnyes.com/media/api/v1/newslist/category/{cat}?'
-    v3 = 'https://news.cnyes.com/api/v3/news/category/{cat}?'
-
-class crawler_method:
-
-
-class anue:
-    cat = {'即時頭條':'headline',
-           'A股港股':'cn_stock',
-           '外匯':'forex',
-           '台股':'tw_stock',
-           '期貨':'future',
-           '國際股':'wd_macro'}
-
-    def __init__(self, category, version, period):
-        self.category = category
-        self.version = version
-        self.period = period
-
-    def url(self):
-        
-        cat = anue.cat
+class anue_news:
+    def __init__():
+        pass
+    def category():
+        cat = {'即時頭條':'headline',
+               'A股港股':'cn_stock',
+               '外匯':'forex',
+               '台股':'tw_stock',
+               '期貨':'future',
+               '國際股':'wd_macro'}
+        return cat
+    def define_url(version,category):
+        url = ''
+        cat = anue_news.category()
         period = 'startAt={t1}&endAt={t2}&limit=30&page={page}'
-
+        v1 = 'https://api.cnyes.com/media/api/v1/newslist/category/{cat}?'
+        v3 = 'https://news.cnyes.com/api/v3/news/category/{cat}?'
         if version == 'v1':
-            url = v1.format(cat=cat[self.category]) + period
+            url = v1.format(cat=cat[category]) + period
         elif version =='v3':
-            url = v3.format(cat=cat[self.category]) + period
+            url = v3.format(cat=cat[category]) + period
         return url
 
     def period(duration = 30):
-        
+        import datetime
         end = datetime.datetime.now()
         start = end - datetime.timedelta(days = duration)
         return [end,start]
@@ -93,11 +82,3 @@ class anue:
                 mydict = { "Date": get[0], "Title": get[1], "Tags":get[2] , "text": get[3] }
                 all.append(mydict)
         return all
-
-if __name__ == '__main__':
-    
-    anue_news.define_url(version,category)
-    anue_news.period(duration)
-    anue_news.timestamp(period)
-    anue_news.get_text(url)
-    anue_news.crawler_all(url,p=7)
