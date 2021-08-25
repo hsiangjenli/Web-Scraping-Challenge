@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../jupyterlab/Kaggle/.idea/Kaggle.iml" filepath="$PROJECT_DIR$/../../jupyterlab/Kaggle/.idea/Kaggle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Web-Scraping-Challenge.iml" filepath="$PROJECT_DIR$/.idea/Web-Scraping-Challenge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../jupyterlab/.idea/jupyterlab.iml" filepath="$PROJECT_DIR$/../../jupyterlab/.idea/jupyterlab.iml" />
+    </modules>
+  </component>
+</project>

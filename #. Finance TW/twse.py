@@ -2,6 +2,7 @@ import requests, json, os, time
 import pandas as pd
 
 from transform_date import TDate
+import datetime
 
 class TWSE_URL:
 	'''定義URL'''
