@@ -17,11 +17,11 @@ from Anue.anue import ANUE_CAT
 ANUE_CAT.cat
 
 >>> {'即時頭條': 'headline',
-	 'A股港股': 'cn_stock',
- 	 '外匯': 'forex',
- 	 '台股': 'tw_stock',
- 	 '期貨': 'future',
- 	 '國際股': 'wd_macro'}
+     'A股港股': 'cn_stock',
+     '外匯': 'forex',
+     '台股': 'tw_stock',
+     '期貨': 'future',
+     '國際股': 'wd_macro'}
 ```
 
 ## **URL Format**
