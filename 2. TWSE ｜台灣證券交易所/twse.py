@@ -22,10 +22,11 @@ class TWSE:
 	cat = {'抓取每日收盤行情(全部)':'crawler_all()',
 		   '抓取個股當月收盤行情':'crawler_stocks()'}
 
-	def __init__(self, period, stock_codes=list, daily_quotes_num=range(1,10)):
+	def __init__(self, period=tuple, stock_codes=list, daily_quotes_num=range(1,10), date=datetime):
 		self.period = period
 		self.stock_codes = stock_codes
 		self.daily_quotes_num = daily_quotes_num
+		self.date = date
 		
 		'''daily_quotes_num
 		可以選擇要回傳特定的dataframe，用list代替
@@ -72,6 +73,25 @@ class TWSE:
 
 		return dict_dfs_date
 
+
+	def crawler_by_date(self):
+		df = pd.DataFrame()
+		date = TDate.date.to_string_nospace(self.date)
+		try:
+			url = TWSE_URL.daily_quotes.format(date = date)
+			data = TWSE.crawler(url)
+		except KeyError:
+			pass
+
+		for num in self.daily_quotes_num:
+			try:
+				df = Clean.to_df_num(data, num)
+				df['日期'] = datetime.datetime.date(self.date)
+				df = df.drop(columns = '漲跌(+/-)')
+			except KeyError:
+				pass
+
+		return df
 	def crawler_stocks(self):
 
 		'''抓取個股當月收盤行情'''
