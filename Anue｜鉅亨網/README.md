@@ -1,5 +1,6 @@
 # **Anue**
-
+---
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/153QIOOtBYG0FOmpwp81O7hqWiGgXEs73?usp=sharing)
 ## **Category**
 
 |中文|category|
@@ -36,18 +37,7 @@ t1, t2 --> start, end (timestamp)
 page --> page
 '''
 ```
-### **timestamp**
-```python
-from Anue.anue import ANUE
 
-ANUE.period_to_timestamp(1)
-
->>> [1629205837, 1629292237]
-
-'''
-最近1日的timestamp
-'''
-```
 ## 抓取Anue
 ### **STEP 1 設定相關資訊**
 ```python
