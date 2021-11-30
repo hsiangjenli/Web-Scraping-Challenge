@@ -68,17 +68,23 @@ ANUE_CAT.cat = {'即時頭條': 'headline',
 '''
 ```
 ### **STEP 2 開始抓取**
+#### **`crawler_type='quick'`**
 ```python
-list_dict_anue = anue.crawler_all()
-```
-### **回傳資料型態**
-```python
-type(list_dict_anue)
->>> list
-
-type(list_dict_anue[0])
->>> dict 
+for news in anue.crawler_all():
+    print(news)
+    print('='*100)
 ```
 <center>
-	<img src = './Images/demo_anue_list_dict_anue[0].png'/>
+	<img src = './Images/demo_quick.png'/>
 </center>
+
+#### **`crawler_type='complete'`**
+```python
+for news in anue.crawler_all(crawler_type='complete'):
+    print(news)
+    print('='*100)
+```
+<center>
+	<img src = './Images/demo_complete.png'/>
+</center>
+
