@@ -1,28 +1,28 @@
 import requests, os, time
 
-from transform_date import TDate
-import datetime
+from TWSE.transformDate import TDate
+from TWSE.Clean import Clean
 
-from Clean import Clean
+import datetime as dt
 
 class TWSE:
     class url:
         main_path = 'https://www.twse.com.tw/'
-        daily_trading = os.path.join(main_path, 'exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={stock_code}')
+        DailyTrading = os.path.join(main_path, 'exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={stock_code}')
         DailyQuotes = os.path.join(main_path, 'exchangeReport/MI_INDEX?response=json&date={date}&type=ALL')
         HighlightsDailyTrading = os.path.join(main_path, 'exchangeReport/FMTQIK?response=json&date={date}')
         class demo:
             '''
-            daily_trading : url
+            DailyTrading : url
                 個股每日收盤行情
 
-            daily_quotes : url
+            DailyQuotes : url
                 全部每日收盤行情
    
-            highlights_daily_Trading : url
+            HighlightsDailyTrading : url
                 台灣加權指數
             '''
-            daily_trading = 'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20210812&stockNo=2330'
+            DailyTrading = 'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20210812&stockNo=2330'
             DailyQuotes = 'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20210812&type=ALL'
             HighlightsDailyTrading = 'https://www.twse.com.tw/exchangeReport/FMTQIK?response=json&date=20211213'
             
@@ -45,14 +45,13 @@ class TWSE:
         `本益比` float,
         `日期` date NOT NULL
         '''
-    def __init__(self, period:tuple, stock_codes=None, date=datetime):
+    def __init__(self, period:tuple, stock_codes:list=None):
         self.period = period
         self.num = [8, 9]
         self.stock_codes = stock_codes
-        self.date = date
         self.sleep = 5
 
-    def crawler_json(self, url):
+    def crawlerJson(self, url):
         '''
         Parameters
         ----------
@@ -86,7 +85,7 @@ class TWSE:
         None.
 
         '''
-        start, end = TDate.str.to_date(self.period[0]), TDate.str.to_date(self.period[1])
+        start, end = TDate.str.withNospace(self.period[0]), TDate.str.withNospace(self.period[1])
         while start <= end:
             '''
             url = urlFormat # TWSE.url.daily_quotes.format(date=TDate.date.to_string_nospace(start))
@@ -110,17 +109,34 @@ class TWSE:
         df : pandas.DataFrame()
             回傳每日收盤行情資料.
         '''
-        start, end = TDate.str.to_date(self.period[0]), TDate.str.to_date(self.period[1])
+        start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
         while start <= end:
-            url = TWSE.url.DailyQuotes.format(date=TDate.date.to_string_nospace(start))
-            self.crawler_json(url)
-            df = Clean.to_df_num(self.raw, self.num[1])
+            if start < dt.datetime(2011, 8, 1):
+                num = self.num[0]
+            else:
+                num = self.num[1]
+            
+            url = TWSE.url.DailyQuotes.format(date=TDate.date.toStringNospace(start))
+            print(url)
+            self.crawlerJson(url)
+            df = Clean.to_df_num(self.raw, num)
             yield df
             time.sleep(self.sleep)
             start = TDate.plus.days(start, delta = 1)
 
     def crawlerTaiwanWeightedIndex(self):
-        pass
+        start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
+        while start.year <= end.year:
+            if start.year == end.year and start.month <= end.month:
+                url = TWSE.url.HighlightsDailyTrading.format(date=TDate.date.toStringNospace(start))
+                self.crawlerJson(url)
+                df = Clean.to_df(self.raw)
+                yield df
+                time.sleep(self.sleep)
+                start = TDate.plus.months(start, delta=1)
+            else:
+                break
+        
     def crawlerStockDailyTrading(self):
         pass
         
