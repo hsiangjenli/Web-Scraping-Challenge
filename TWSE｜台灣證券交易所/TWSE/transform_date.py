@@ -6,6 +6,8 @@ class TDate:
 	class str:
 		def to_date(string):
 			return datetime.datetime.strptime(string, '%Y-%m-%d')
+        def to_string_nospace(string):
+            return TDate.date.to_string_nospace(TDate.str.to_date(string))
 	
 	class plus:
 		def days(date, delta = 1):
