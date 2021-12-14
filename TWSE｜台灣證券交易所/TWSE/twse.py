@@ -2,7 +2,9 @@ import requests, json, os, time
 import pandas as pd
 
 from transform_date import TDate
-import datetime
+import datetime as dt
+from datetime import date
+from datetime import datetime as dtdt
 
 class TWSE_URL:
 	'''定義URL'''
@@ -22,7 +24,7 @@ class TWSE:
 	cat = {'抓取每日收盤行情(全部)':'crawler_all()',
 		   '抓取個股當月收盤行情':'crawler_stocks()'}
 
-	def __init__(self, period=tuple, stock_codes=list, daily_quotes_num=range(1,10), date=datetime):
+	def __init__(self, period=tuple, stock_codes=list, daily_quotes_num=range(1,10), date=None):
 		self.period = period
 		self.stock_codes = stock_codes
 		self.daily_quotes_num = daily_quotes_num
@@ -59,7 +61,7 @@ class TWSE:
 				
 				for num in self.daily_quotes_num:
 					dict_dfs[num] = Clean.to_df_num(data, num)
-					dict_dfs[num]['日期'] = datetime.datetime.date(start)
+					dict_dfs[num]['日期'] = dt.datetime.date(start)
 	
 				dict_dfs_date[start.strftime('%Y-%m-%d')] = dict_dfs
 				time.sleep(5)
