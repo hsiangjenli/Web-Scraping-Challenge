@@ -31,23 +31,19 @@ class TWSE:
 		'''daily_quotes_num
 		可以選擇要回傳特定的dataframe，用list代替
 		'''
+	def crawler(url):
+		r = requests.get(url)
+		self.json = r.json()
+		return self
 
 	def crawler_all(self):
 
-		'''抓取每日收盤行情(全部)'''
+		'''抓取每日收盤行情(全部)
 
 		'''包括{價格指數(臺灣證券交易所), 價格指數(跨市場), 價格指數(臺灣指數公司), 
 		報酬指數(臺灣證券交易所), 報酬指數(跨市場), 報酬指數(臺灣指數公司), 
 		大盤統計資訊, 漲跌證券數合計, 每日收盤行情(全部)}'''
 
-		'''USAGE-1
-		period = ('2021-08-12', '2021-08-14')
-		twse = TWSE(period = period)
-		dict_dfs_date = twse.crawler_all()
-		dict_dfs_date.keys()
-
-		for key in dict_dfs:
-    		print(dict_dfs[key])
 		'''
 		dict_dfs_date = {}
 		
@@ -57,7 +53,8 @@ class TWSE:
 			date = TDate.date.to_string_nospace(start)
 			try:
 				url = TWSE_URL.daily_quotes.format(date = date)
-				data = TWSE.crawler(url)
+				self.crawler(url)
+				data = self.json
 				dict_dfs = {}
 				
 				for num in self.daily_quotes_num:
@@ -79,7 +76,8 @@ class TWSE:
 		date = TDate.date.to_string_nospace(self.date)
 		try:
 			url = TWSE_URL.daily_quotes.format(date = date)
-			data = TWSE.crawler(url)
+			self.crawler(url)
+			data = self.json
 		except KeyError:
 			pass
 
@@ -91,7 +89,7 @@ class TWSE:
 			except KeyError:
 				pass
 
-		return df
+		yield df
 	def crawler_stocks(self):
 
 		'''抓取個股當月收盤行情'''
@@ -123,7 +121,7 @@ class TWSE:
 
 				date = TDate.date.to_string_nospace(start)
 				url = TWSE_URL.daily_trading.format(date = date, stock_code = stock_code)
-				data = TWSE.crawler(url)
+				data = self.crawler(url)
 
 				locals()[f'df_{stock_code}'+str(start)] = Clean.to_df(data,
 																	  stock_code = stock_code)
@@ -137,10 +135,7 @@ class TWSE:
 
 		return dict_dfs_stock_codes
 
-	def crawler(url):
-		r = requests.get(url)
-		return r.json()
-		
+
 
 class Clean:
 	'''將json轉換成DataFrame'''
