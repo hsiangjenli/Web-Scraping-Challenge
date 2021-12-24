@@ -3,33 +3,27 @@
 ## **使用**
 
 ### **基本**
-
-```python
+```python=
 from TWSE.twserevise import TWSE
 
 period = ('2021-08-11', '2021-10-13')
 twse = TWSE(period=period)
 ```
-
 #### **每日收盤行情**
-
-```python
+```python=
 for df in twse.crawlerDailyQuotes():
     print(df)
 ```
 
 #### **台灣加權價指數**
-
-```python
+```python=
 for df in twse.crawlerTaiwanWeightedIndex():
     print(df)
 ```
 
 ### **連接資料庫**
-
 #### **SQLite**
-
-```python
+```python=
 import sqlite3
 
 table = '發行量加權股價指數'
@@ -66,9 +60,9 @@ for df in twse.crawlerTaiwanWeightedIndex():
     df.to_sql(table, con = conn, if_exists = 'append', index=False)
 ```
 
-#### **MySQL**
 
-```python
+#### **MySQL**
+```python=
 from sqlalchemy import create_engine
 import MySQLdb
 
