@@ -63,9 +63,6 @@ for news in anue.crawler_all():
     print(news)
     print('='*100)
 ```
-<center>
-	<img src = './Images/demo_quick.png'/>
-</center>
 
 #### **`crawler_type='complete'`**
 ```python
@@ -73,7 +70,3 @@ for news in anue.crawler_all(crawler_type='complete'):
     print(news)
     print('='*100)
 ```
-<center>
-	<img src = './Images/demo_complete.png'/>
-</center>
-
