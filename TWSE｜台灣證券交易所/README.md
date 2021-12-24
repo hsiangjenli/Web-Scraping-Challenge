@@ -1,168 +1,114 @@
-# Source 
-```python
-from twse import TWSE_URL
+# **TWSE**
 
-TWSE_URL.demo.daily_trading
-TWSE_URL.demo.daily_quotes
+## **使用**
+
+### **基本**
+```python
+from TWSE.twserevise import TWSE
+
+period = ('2021-08-11', '2021-10-13')
+twse = TWSE(period=period)
 ```
-<img src = "./gif/Source Data.gif">
-
-# Import TWSE
-
-## Category
+#### **每日收盤行情**
 ```python
-from twse import TWSE
-TWSE.cat
-```
-
-## 抓取每日收盤行情
-### STEP 1 設定相關資訊
-
-```python
-period = ('2021-08-12', '2021-08-14')
-
-'''方法1'''
-daily_quotes = TWSE(period = period)
-
-'''方法2'''
-daily_quotes = TWSE(period = period, 
-                    daily_quotes_num = [9] # 指定回傳特定資料表, type = list
-                   )
-```
-### STEP 2 開始抓取資料
-
-```python
-dict_dfs = daily_quotes.crawler_all()
+for df in twse.crawlerDailyQuotes():
+    print(df)
 ```
 
-### STEP 3 回傳資料型態
-
+#### **台灣加權價指數**
 ```python
-type(dict_dfs)
->>> dict
-
-dict_dfs.keys()
->>> dict_keys(['2021-08-12', '2021-08-13'])
-
-'''
-2021-08-14為假日，自動跳過。
-'''
-
-for key in dict_dfs['2021-08-12']:
-    print(key)
-
->>> 1 # 110年08月12日 價格指數(臺灣證券交易所)
->>> 2 # 價格指數(跨市場)
->>> 3 # 價格指數(臺灣指數公司)
->>> 4 # 報酬指數(臺灣證券交易所)
->>> 5 # 報酬指數(跨市場)
->>> 6 # 報酬指數(臺灣指數公司)
->>> 7 # 110年08月12日 大盤統計資訊
->>> 8 # 漲跌證券數合計
->>> 9 # 110年08月12日每日收盤行情(全部)
+for df in twse.crawlerTaiwanWeightedIndex():
+    print(df)
 ```
 
-```python
-daily_quotes = TWSE(period = period, daily_quotes_num = [9])
-```
-
-```python
-dict_dfs = daily_quotes.crawler_all()
-```
-
-```python
-dict_dfs['2021-08-13'][9].head(3)
-```
-## 抓取個股當月收盤行情
-### STEP 1 設定相關資訊
-```python
-stock_codes = ['2330', '1234']
-period = ('2021-04-1', '2021-08-1')
-
-'''Period Fomat
-
-   (%Y-%m-%1) 每個月的1號開始及結束，避免重複抓取
-
-'''
-
-twse = TWSE(period = period, stock_codes = stock_codes)
-```
-### STEP 2 開始抓取資料
-#### 方法 1 全部回傳
-```python
-twse = TWSE(period = period, stock_codes = stock_codes)
-dict_dfs = twse.crawler_stocks()
-dict_dfs[stock_codes[0]]
-```
-#### 方法 2 批次回傳
-```python
-for stock_code in stock_codes:
-    twse = TWSE(period = period, stock_codes = [stock_code])
-    df = twse.crawler_stocks()
-    
-df[stock_code]
-```
-### STEP 3 回傳資料型態
-```python
-type(dict_dfs)
->>> dict
-
-dict_dfs.keys()
->>> dict_keys(['2330', '1234'])
-```
-## SQlite
-### Table Structure
-```python
-def create_table():
-    tb = '''
-            股票代碼 int,
-            日期 date, 
-            成交股數 float, 
-            成交金額 float, 
-            開盤價 float, 
-            最高價 float, 
-            最低價 float, 
-            收盤價 float, 
-            漲跌價差 float, 
-            成交筆數 float    
-    '''
-    return tb
-```
-
-### DB connection
+### **連接資料庫**
+#### **SQLite**
 ```python
 import sqlite3
+
+table = '發行量加權股價指數'
+
+createTable = '''
+    `日期` date NOT NULL,
+    `成交股數` bigint(20) NOT NULL,
+    `成交金額` bigint(20) NOT NULL,
+    `成交筆數` bigint(20) NOT NULL,
+    `發行量加權股價指數` DECIMAL(7, 2) NOT NULL,
+    `漲跌點數` float NOT NULL
+    '''
 
 conn = sqlite3.connect('TWSE.db')
 c = conn.cursor() 
 try:
-    c.execute(f'''CREATE TABLE TWSE({create_table()})''')
+    c.execute(f'CREATE TABLE TWWI ({createTable})')
 except:
     pass
+
+from TWSE.transformDate import TDate
+from TWSE.twserevise import TWSE
+import datetime
+
+import numpy as np
+
+now = TDate.date.toStringwithDash(datetime.datetime.now())
+#period = ('1990-01-04', now)
+#period = (rDate, now)
+period = ('2016-10-10', now)
+twse = TWSE(period=period)
+
+for df in twse.crawlerTaiwanWeightedIndex():
+    df.to_sql(table, con = conn, if_exists = 'append', index=False)
 ```
 
+
+#### **MySQL**
 ```python
-from twse import TWSE
+from sqlalchemy import create_engine
+import MySQLdb
 
-period = ('2021-03-1', '2021-08-1')
-```
+user = 'root'
+pw = "****"
+db = 'TWSE'
+table = '發行量加權股價指數'
 
-### 存入多筆資料
+createTable = '''
+    `日期` date NOT NULL,
+    `成交股數` bigint(20) NOT NULL,
+    `成交金額` bigint(20) NOT NULL,
+    `成交筆數` bigint(20) NOT NULL,
+    `發行量加權股價指數` DECIMAL(7, 2) NOT NULL,
+    `漲跌點數` float NOT NULL
+    '''
 
-```python
-stock_codes = ['2330','1234', '2357', '2317']
+engine = create_engine(f'mysql+pymysql://{user}:{pw}@localhost/{db}')
+conn=MySQLdb.connect(host="127.0.0.1",user=user, passwd=pw,charset='utf8')
+cursor=conn.cursor()
+cursor.execute(f'USE {db}')
 
-for stock_code in stock_codes:
-    twse = TWSE(period = period, stock_codes = [stock_code])
-    df = twse.crawler_stocks()
-    df[stock_code].to_sql('TWSE', conn, if_exists='append', index = False)
-conn.close()
-```
-### 讀取資料
-```python
-import sqlite3 as sql
-import pandas as pd
-con = sql.connect("TWSE.db")
-df = pd.read_sql(f"select 股票代碼, 開盤價, 最低價, 最高價, 收盤價, 日期 from TWSE where 股票代碼 = '2330' and 日期 between '2021-08-01' and '2021-08-17'", con)
-conn.close
+try:
+    cursor.execute(f'CREATE TABLE `{table}` ({createTable})')
+except:
+    pass
+
+from TWSE.transformDate import TDate
+from TWSE.sqlHelper import sqlHelper as sHelper
+from TWSE.twserevise import TWSE
+
+import numpy as np
+
+sh = sHelper(user=user, pw=pw, db=db, table=table)
+now = TDate.date.toStringwithDash(datetime.datetime.now())
+rDate = sh.getResult(rType='string')
+#period = ('1990-01-04', now)
+#period = (rDate, now)
+period = ('2021-10-10', now)
+twse = TWSE(period=period)
+
+for df in twse.crawlerTaiwanWeightedIndex():
+    if sh.inSql(df):
+        if sh.LocList(df) != None:
+            df = df.loc[sh.LocList(df)]
+        else:
+            break
+    df.to_sql(table, con = engine, if_exists = 'append', index=False)
 ```
