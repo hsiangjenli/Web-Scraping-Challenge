@@ -21,3 +21,5 @@ class TDate:
 
         def toStringNospace(date):
             return date.strftime('%Y%m%d')
+        def toStringwithDash(date):
+            return date.strftime('%Y-%m-%d')

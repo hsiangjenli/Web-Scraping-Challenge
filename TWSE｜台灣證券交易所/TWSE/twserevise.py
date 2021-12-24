@@ -20,31 +20,12 @@ class TWSE:
                 全部每日收盤行情
    
             HighlightsDailyTrading : url
-                台灣加權指數
+                發行量加權股價指數
             '''
             DailyTrading = 'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20210812&stockNo=2330'
             DailyQuotes = 'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20210812&type=ALL'
             HighlightsDailyTrading = 'https://www.twse.com.tw/exchangeReport/FMTQIK?response=json&date=20211213'
             
-    class sql:
-        createTable = '''
-        `證券代號` varchar(20) NOT NULL,
-        `證券名稱` varchar(20) NOT NULL,
-        `成交股數` float,
-        `成交筆數` float,
-        `成交金額` float,
-        `開盤價` float NOT NULL,
-        `最高價` float NOT NULL,
-        `最低價` float NOT NULL,
-        `收盤價` float NOT NULL,
-        `漲跌價差` float,
-        `最後揭示買價` float,
-        `最後揭示買量` float,
-        `最後揭示賣價` float,
-        `最後揭示賣量` bigint(20),
-        `本益比` float,
-        `日期` date NOT NULL
-        '''
     def __init__(self, period:tuple, stock_codes:list=None):
         self.period = period
         self.num = [8, 9]
@@ -106,7 +87,7 @@ class TWSE:
 
         Yields
         ------
-        df : pandas.DataFrame()
+        df : pandas.DataFrame
             回傳每日收盤行情資料.
         '''
         start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
@@ -117,7 +98,6 @@ class TWSE:
                 num = self.num[1]
             
             url = TWSE.url.DailyQuotes.format(date=TDate.date.toStringNospace(start))
-            print(url)
             self.crawlerJson(url)
             df = Clean.to_df_num(self.raw, num)
             yield df
@@ -125,9 +105,21 @@ class TWSE:
             start = TDate.plus.days(start, delta = 1)
 
     def crawlerTaiwanWeightedIndex(self):
+        '''
+        Parameters
+        ----------
+        period : Tuple
+            從1990-01-04開始提供資料
+
+        Yields
+        ------
+        df : pandas.DataFrame
+            回傳每月發行量加權股價指數資料.
+
+        '''
         start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
         while start.year <= end.year:
-            if start.year == end.year and start.month <= end.month:
+            if (start.year < end.year) or (start.year == end.year and start.month <= end.month):
                 url = TWSE.url.HighlightsDailyTrading.format(date=TDate.date.toStringNospace(start))
                 self.crawlerJson(url)
                 df = Clean.to_df(self.raw)
