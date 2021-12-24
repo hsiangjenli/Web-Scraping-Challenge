@@ -2,6 +2,7 @@ import os, re
 import datetime
 import requests, json
 from bs4 import BeautifulSoup
+from enum import auto
 
 class ANUE_CAT:
     cat = {'即時頭條':'headline',
