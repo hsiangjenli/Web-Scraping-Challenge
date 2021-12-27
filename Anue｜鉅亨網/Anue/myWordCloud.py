@@ -10,20 +10,16 @@ fontPATH = './Anue/jf-openhuninn-1.1.ttf'
 
 class myWordCloud:
     def __init__(self, 
-                 data=None, 
-                 filename='myWordCloud', 
+                 #data=None, 
+                 #filename='myWordCloud', 
                  mask='./Anue/bear-market.png', 
                  font_path=fontPATH, 
-                 background_color='white', 
+                 background_color=None, 
                  recolor=False):
         
         '''
         Parameters
         ----------
-        data : string
-            文章
-        filename : string
-            輸出時的文字雲的檔案名稱，不須包含副檔名。
         mask : string
             文字雲的形狀。圖片的路徑。
         font_path : string
@@ -34,9 +30,6 @@ class myWordCloud:
         recolor : bool
             字的顏色是否根據mask重新上色。
         '''
-
-        self.data = data
-        self.filename = filename
         self.mask = mask
         self.font_path = font_path
         self.background_color = background_color
@@ -46,7 +39,7 @@ class myWordCloud:
 
     def generate(self):
         self.wc = WordCloud(mode="RGBA", 
-                            background_color=None,
+                            background_color=self.background_color,
                             scale=5, 
                             mask=self.color_mask, 
                             font_path=self.font_path)
@@ -63,21 +56,25 @@ class myWordCloud:
 
         raise NotImplementedError
 
-    def fit(self):
+    def fit(self, filename='myWordCloud', data=None):
         '''
-        # Preprocessing Data
-
-        ## Adding your personal stopwords
-        > 'stopwords.txt'
-
-        ## Adding your personal userdict
-        > 'userdict.txt'
-
+        Parameters
+        ----------
+        data : string
+            文章內容
+        filename : string
+            輸出時的文字雲的檔案名稱，不須包含副檔名。
         '''
+        self.filename = filename
+        self.data = data
+        
         self.userdict()
         self.stopwords()
         self.to_frequency()
-        self.mymask()
+        try:
+            self.mymask()
+        except:
+            pass
     
     def userdict(self):       
         data = self.data
