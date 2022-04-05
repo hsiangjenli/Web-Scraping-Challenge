@@ -5,12 +5,20 @@ from TWSE.Clean import Clean
 
 import datetime as dt
 
+class INDUSTRY:
+    Cement = '01'
+    Electronic = '13'
+    FinancialandInsurance = '17'
+    
 class TWSE:
     class url:
         main_path = 'https://www.twse.com.tw/'
         DailyTrading = os.path.join(main_path, 'exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={stock_code}')
         DailyQuotes = os.path.join(main_path, 'exchangeReport/MI_INDEX?response=json&date={date}&type=ALL')
         HighlightsDailyTrading = os.path.join(main_path, 'exchangeReport/FMTQIK?response=json&date={date}')
+        TotalIndexHistoricalData = os.path.join(main_path, 'indicesReport/MI_5MINS_HIST?response=json&date={date}')
+        DailyIndustry = os.path.join(main_path, 'exchangeReport/MI_INDEX?response=json&date={date}&type={industry_id}')
+        Every5SecondsIndex = os.path.join(main_path, 'exchangeReport/MI_5MINS_INDEX?response=json&date={date}')
         class demo:
             '''
             DailyTrading : url
@@ -25,11 +33,14 @@ class TWSE:
             DailyTrading = 'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20210812&stockNo=2330'
             DailyQuotes = 'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20210812&type=ALL'
             HighlightsDailyTrading = 'https://www.twse.com.tw/exchangeReport/FMTQIK?response=json&date=20211213'
-            
-    def __init__(self, period:tuple, stock_codes:list=None):
+            TotalIndexHistoricalData = 'https://www.twse.com.tw/en/indicesReport/MI_5MINS_HIST?response=json&date=20220301'
+            Every5SecondsIndex = 'https://www.twse.com.tw/en/exchangeReport/MI_5MINS_INDEX?response=json&date=20220401'
+
+    def __init__(self, period:tuple, stock_codes:list=None, industry_id=None):
         self.period = period
         self.num = [8, 9]
         self.stock_codes = stock_codes
+        self.industry_id = industry_id
         self.sleep = 5
 
     def crawlerJson(self, url):
@@ -128,9 +139,52 @@ class TWSE:
                 start = TDate.plus.months(start, delta=1)
             else:
                 break
-        
+    
+    def crawlerIndustry(self):
+        start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
+        num = 1
+        while start <= end:
+            url = TWSE.url.DailyIndustry.format(date=TDate.date.toStringNospace(start), industry_id=self.industry_id)
+            self.crawlerJson(url)
+            try:
+                df = Clean.to_df_num(self.raw, num)
+                df.drop(columns=['漲跌(+/-)'])
+                df['日期'] = TDate.date.toStringwithDash(start)
+                yield df
+            except:
+                pass
+            time.sleep(self.sleep)
+            start = TDate.plus.days(start, delta = 1)        
+    
     def crawlerStockDailyTrading(self):
         pass
+        
+    def crawlerTotalIndexHistoricalData(self):
+        start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
+        while start.year <= end.year:
+            if (start.year < end.year) or (start.year == end.year and start.month <= end.month):
+                url = TWSE.url.TotalIndexHistoricalData.format(date=TDate.date.toStringNospace(start))
+                self.crawlerJson(url)
+                df = Clean.to_df(self.raw)
+                yield df
+                time.sleep(self.sleep)
+                start = TDate.plus.months(start, delta=1)
+            else:
+                break
+    
+    def crawlerEvery5SecondsIndex(self):
+        start, end = TDate.str.toDate(self.period[0]), TDate.str.toDate(self.period[1])
+        while start <= end:
+            url = TWSE.url.Every5SecondsIndex.format(date=TDate.date.toStringNospace(start))
+            self.crawlerJson(url)
+            try:
+                df = Clean.to_df_num(self.raw)
+                df['日期'] = TDate.date.toStringwithDash(start)
+                yield df
+            except:
+                pass
+            time.sleep(self.sleep)
+            start = TDate.plus.days(start, delta = 1)
         
         
             

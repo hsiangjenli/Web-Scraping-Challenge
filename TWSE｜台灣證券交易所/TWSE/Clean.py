@@ -13,7 +13,7 @@ class Clean:
 
         return df
 
-    def to_df_num(data, num):
+    def to_df_num(data, num=''):
         df = pd.DataFrame(data[f'data{num}'])
         df.columns = data[f'fields{num}']
 
